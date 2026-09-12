@@ -1,0 +1,15 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Publish output
+publish/
+*.exe
+*.pdb
+
+# Rider / VS Code
+.idea/
+.vscode/

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <AssemblyName>MaxDebloat</AssemblyName>
+    <RootNamespace>MaxDebloat</RootNamespace>
+    <Product>MAX DEBLOAT</Product>
+    <AssemblyTitle>MAX DEBLOAT - Windows 11 Gaming Stripper</AssemblyTitle>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+
+    <!-- Force elevation + Win11 compat + per-monitor DPI -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Single portable exe: runtime is embedded, nothing is downloaded at runtime -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+
+    <!-- Trimming is unsafe with WinForms reflection; keep it off -->
+    <PublishTrimmed>false</PublishTrimmed>
+
+    <!-- Smaller, cleaner release binary -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+</Project>
