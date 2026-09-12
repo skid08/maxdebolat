@@ -12,6 +12,22 @@ internal static class ServicesActions
     {
         var a = new List<TweakAction>();
 
+        // ---- BIGGEST process-count lever ----
+        // On machines with >3.5 GB RAM, Windows runs every service in its OWN svchost.exe.
+        // Raising the split threshold above installed RAM forces services to share a handful
+        // of svchost processes instead. This alone typically removes 20-40 processes after a reboot.
+        a.Add(new TweakAction
+        {
+            Id = "svc_group_svchost", Category = Category.Services,
+            Name = "Group svchost processes (huge process cut)",
+            Desc = "Force all shareable services into shared svchost.exe processes. REQUIRES REBOOT.",
+            Run = r =>
+            {
+                r.RegDword(@"HKLM\SYSTEM\CurrentControlSet\Control", "SvcHostSplitThresholdInKB", 0xFFFFFFFF);
+                r.Log("  svchost grouping set. This takes effect after the next reboot.", LogLevel.Warn);
+            }
+        });
+
         // Telemetry / diagnostics
         a.Add(ActionRegistry.Svc("Connected User Experiences (DiagTrack)", "DiagTrack", "The main Windows telemetry service."));
         a.Add(ActionRegistry.Svc("WAP Push Message Routing", "dmwappushservice", "Telemetry transport service."));
@@ -77,6 +93,24 @@ internal static class ServicesActions
 
         // Update stack (OFF by default: you likely still want security patches even on a gaming VM)
         a.Add(ActionRegistry.SvcGroup("update", "Windows Update stack", new[] { "wuauserv", "UsoSvc", "WaaSMedicSvc", "BITS", "DoSvc" }, "Update + delivery-optimization services. OFF by default (breaks updates).", nuke: false));
+
+        // ---- Deeper cuts to push process count down further ----
+        a.Add(ActionRegistry.Svc("Problem Reports control panel", "wercplsupport", "Problem Reports support service."));
+        a.Add(ActionRegistry.Svc("Data Usage", "DusmSvc", "Per-app network data usage tracking."));
+        a.Add(ActionRegistry.Svc("Shell Hardware Detection", "ShellHWDetection", "AutoPlay / removable-media detection."));
+        a.Add(ActionRegistry.Svc("Network Connection Broker", "NcbService", "Background network for UWP apps."));
+        a.Add(ActionRegistry.Svc("Push Notifications", "WpnService", "Windows toast/push notification system."));
+        a.Add(ActionRegistry.Svc("Device Setup Manager", "DsmSvc", "Downloads driver metadata for new devices."));
+        a.Add(ActionRegistry.Svc("Device Management Enrollment", "DmEnrollmentSvc", "MDM / workplace enrollment."));
+        a.Add(ActionRegistry.Svc("Payments/SmartCard PnP", "ScDeviceEnum", "Smart card device enumeration."));
+        a.Add(ActionRegistry.Svc("Sensor Service", "SensorService", "Ambient light / orientation sensors."));
+        a.Add(ActionRegistry.Svc("Offline Files", "CscService", "Offline file caching.", nuke: false));
+
+        // Store / licensing / account (safe once apps are removed, but OFF by default:
+        // disabling these blocks Store, Store-app launch and Microsoft-account sign-in)
+        a.Add(ActionRegistry.SvcGroup("store", "Store & licensing", new[] { "InstallService", "LicenseManager", "ClipSVC", "AppXSvc" }, "Store install/licensing. OFF by default (breaks the Store & UWP apps).", nuke: false));
+        a.Add(ActionRegistry.SvcGroup("account", "MS account / token broker", new[] { "wlidsvc", "TokenBroker", "DeviceAssociationService" }, "Microsoft-account + token broker. OFF by default (breaks MS-account sign-in).", nuke: false));
+        a.Add(ActionRegistry.Svc("Windows Time", "W32Time", "Clock sync. OFF by default (clock may drift).", nuke: false));
 
         return a;
     }
